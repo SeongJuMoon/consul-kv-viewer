@@ -4,7 +4,7 @@
 # build
 ## build via docker
   ```
-  docker 
+  docker build -t <tagname> .
   ```
 ## build via code
   ```
