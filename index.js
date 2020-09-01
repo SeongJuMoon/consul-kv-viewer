@@ -9,12 +9,27 @@ const envViewResolver = async (_, res) => {
     res.end(env.join('\n'));
 };
 
+
+const getConsulHTTPEndpoint = (url, port) => {
+    if (url === undefined) return undefined;
+    if (port === undefined) {
+        return `http://${url}/v1/kv`;
+    } else {
+        return `http://${url}:${port}/v1/kv`;
+    }
+}
+
 const loadConfig = async (_, res) => {
-    const consul_url = process.env.CONSUL_URL || "localhost";
-    if (consul_url === "") {
+    const consulURL = getConsulHTTPEndpoint(process.env.CONSUL_URL, process.env.PORT);
+    const accessToken = process.env.TOKEN;
+    if (!consulURL) {
         throw new Error("Remote Config Server Doesn't Setting Now");
     }
-    const response = await fetch(`http://${consul_url}:8500/v1/kv/nodeService`, { method: "GET" });
+    if (!accessToken) {
+        throw new Error("X-Consul-Token doesn't Setting Now");
+    }
+    console.log(accessToken);
+    const response = await fetch(`${consulURL}/nodeService`, { method: "GET", headers: {'X-Consul-Token': accessToken, 'Content-Type': 'application/json'}});
     const data = await response.json();
     const config = [];
 
@@ -48,6 +63,7 @@ http.createServer((req, res) => {
     const handler = route[url];
     if (handler === undefined) {
         res.statusCode = 404;
+        res.setHeader("Content-Type", "text/html; charset=utf-8")
         res.end("대충 없다는 내용");
     }
     if (typeof handler === 'function') {
