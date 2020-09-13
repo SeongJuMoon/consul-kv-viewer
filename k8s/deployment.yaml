@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kv-viewer
+  labels:
+    app: kv-viewer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kv-viewer
+  template:
+    metadata:
+      labels:
+        app: kv-viewer
+    spec:
+      containers:
+      - name: kv-viewer-server
+        image: seongjumoon/kv-viewer
+        ports:
+        - containerPort: 80
